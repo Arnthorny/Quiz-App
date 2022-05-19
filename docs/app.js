@@ -89,14 +89,15 @@ const hasWon = function (win = true, walkaway = false) {
   for (const btns of allOptionButtonEl) {
     listenerToggle(btns, "remove", checker);
   }
+  cashWonEl.parentElement.classList.add("hidden");
   if (win) {
-    questionNumber.textContent = `YOU HAVE WON \u20A6 ${cashWon.toLocaleString()}`;
+    questionNumber.textContent = `YOU HAVE WON \u20A6${cashWon.toLocaleString()}`;
   } else if (walkaway) {
-    questionNumber.textContent = `YOU WALKED AWAY WITH \u20A6 ${cashWon.toLocaleString()}`;
+    questionNumber.textContent = `YOU WALKED AWAY WITH \u20A6${cashWon.toLocaleString()}`;
   } else {
     let amountWon = cashWon >= 250000 ? 250000 : cashWon >= 10000 ? 10000 : 0;
     console.log(amountWon);
-    questionNumber.textContent = `YOU HAVE WON \u20A6 ${amountWon.toLocaleString()}`;
+    questionNumber.textContent = `YOU HAVE WON \u20A6${amountWon.toLocaleString()}`;
   }
   startButton.removeEventListener("click", walk);
   startButton.childNodes[0].textContent = "RESTART GAME";

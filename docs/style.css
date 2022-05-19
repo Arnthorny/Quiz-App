@@ -130,6 +130,7 @@ main {
   border: 2px solid orangered;
   top: -3%;
   align-self: center;
+  text-align: center;
   position: relative;
   padding: 0.5rem 1rem;
 }
