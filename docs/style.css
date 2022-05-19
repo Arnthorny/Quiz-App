@@ -194,6 +194,11 @@ main {
   -webkit-tap-highlight-color: transparent;
 }
 
+.guaranteed {
+  color: black;
+  background-color: #ff4500;
+}
+
 .gameStart button:active {
   transform: translate(0, 10%);
   box-shadow: 0 1rem 2rem rgba(241, 228, 228, 0.8);

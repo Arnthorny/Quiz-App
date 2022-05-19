@@ -26,14 +26,9 @@ const questionsForGame = [
 ];
 
 const cashToWin = [
-  "0",
-  "5,000",
-  "7,500",
-  "10,000",
-  "15,000",
-  "20,000",
-  "50,000",
+  0, 5000, 7500, 10000, 15000, 20000, 30000, 45000, 70000, 120000,
 ];
+
 const startButton = document.querySelector(".gameStart");
 const dropCloseBtn = document.querySelector(".dropbtn");
 const dropIcons = document.querySelectorAll(".drop");
@@ -44,9 +39,12 @@ const questionEL = document.querySelector(".question");
 const allOptionTextEl = document.querySelectorAll(".op");
 const allOptionButtonEl = document.querySelectorAll(".option");
 const questionNumber = document.querySelector(".questionNo");
-const cashWon = document.querySelector(".money");
+const cashWonEl = document.querySelector(".money");
 
-const qnA = [...questionsForGame];
+let qIndex;
+let qnA;
+let cashWon;
+
 let currentSelection;
 let randomIndex;
 
@@ -63,60 +61,74 @@ const lifelineToggle = function () {
   dropIcons[1].classList.toggle("hidden");
   lifeLinesBox.classList.toggle("hidden");
   overlay.classList.toggle("hidden");
-  console.log("baba");
+  console.log("toggleChek");
 };
 
 function lifeLineUsed() {
   this.classList.add("used");
+  let y = currentSelection.options[1];
+  let everyOther = [...allOptionTextEl].filter((x) => x.textContent !== y);
+  for (let i = 0; i < 2; i++) {
+    let j = Math.floor(Math.random() * everyOther.length);
+    everyOther[j].textContent = "";
+    everyOther[j].parentElement.removeEventListener("click", checker);
+    everyOther.splice(j, 1);
+  }
   lifelineToggle();
+  listenerToggle(dropCloseBtn, "remove", lifelineToggle);
   this.removeEventListener("click", lifeLineUsed);
 }
-
-// dropCloseBtn.addEventListener("click", () => {
-//   lifelineToggle();
 
 //   // lifeLinesBox.style.display = dropIcons[0].classList.contains("hidden")
 //   //   ? "block"
 //   //   : "none";
 // });
 
-const hasWon = function (win = true) {
+const hasWon = function (win = true, walkaway = false) {
   listenerToggle(dropCloseBtn, "remove", lifelineToggle);
   for (const btns of allOptionButtonEl) {
     listenerToggle(btns, "remove", checker);
-
-    if (win) {
-      questionNumber.textContent = `YOU WON ${
-        document.querySelector(".cash").textContent
-      }!!🥇🎉`;
-    } else {
-      questionNumber.textContent = `YOU LOST`;
-    }
   }
+  if (win) {
+    questionNumber.textContent = `YOU HAVE WON \u20A6 ${cashWon.toLocaleString()}`;
+  } else if (walkaway) {
+    questionNumber.textContent = `YOU WALKED AWAY WITH \u20A6 ${cashWon.toLocaleString()}`;
+  } else {
+    let amountWon = cashWon >= 250000 ? 250000 : cashWon >= 10000 ? 10000 : 0;
+    console.log(amountWon);
+    questionNumber.textContent = `YOU HAVE WON \u20A6 ${amountWon.toLocaleString()}`;
+  }
+  startButton.removeEventListener("click", walk);
+  startButton.childNodes[0].textContent = "RESTART GAME";
+  startButton.addEventListener("click", begin);
 };
 
-function renderQ(selection, gameplay = true) {
-  if (selection && selection.question && gameplay) {
-    cashWon.textContent = cashToWin[Number(questionNumber.textContent)];
-    questionNumber.textContent = `${Number(questionNumber.textContent) + 1}`;
+function renderQ(selection, gameplay = true, walkaway = false) {
+  if (selection && selection.question && gameplay && !walkaway) {
+    cashWon = cashToWin[qIndex];
+    cashWonEl.textContent = cashWon.toLocaleString();
+    qIndex++;
+    questionNumber.textContent = qIndex;
     questionNumber.classList.remove("hidden");
     questionEL.textContent = selection.question;
+    listenerToggle(dropCloseBtn, "add", lifelineToggle);
 
     const options = [...selection.options];
     for (const x of allOptionTextEl) {
       const randomIndex = Math.trunc(Math.random() * options.length);
       x.textContent = options[randomIndex];
-      // console.log(x.parentElement);
       x.parentElement.style.backgroundColor = "";
       options.splice(randomIndex, 1);
-      //   console.log(index, optionCopy);
+      x.parentElement.addEventListener("click", checker);
     }
   } else {
-    if (!(selection && selection.question)) {
-      hasWon();
-    } else {
-      console.log("Uh oh");
-    }
+  }
+  if (walkaway) {
+    hasWon(false, true);
+  } else if (!(selection && selection.question)) {
+    hasWon();
+  } else {
+    console.log("Smooth");
   }
 }
 
@@ -150,7 +162,20 @@ function checker() {
 
 // const optionCopy = [...options];
 
+function walk() {
+  renderQ(null, false, true);
+  for (const op of allOptionTextEl) {
+    if (op.textContent === currentSelection.options[1]) {
+      op.parentElement.style.backgroundColor = "green";
+      break;
+    }
+  }
+}
+
 function begin() {
+  qnA = [...questionsForGame];
+  questionNumber.textContent = qIndex = 0;
+
   renderQ(nextQuestion());
 
   for (const btns of allOptionButtonEl) {
@@ -158,8 +183,14 @@ function begin() {
   }
   for (const lifeline of lifeLines) {
     listenerToggle(lifeline, "add", lifeLineUsed);
+    lifeline.classList.remove("used");
   }
   dropCloseBtn.addEventListener("click", lifelineToggle);
+
+  startButton.removeEventListener("click", begin);
+  startButton.childNodes[0].textContent = "WALK AWAY";
+
+  startButton.addEventListener("click", walk);
   console.log("done");
 }
 
