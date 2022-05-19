@@ -1,6 +1,6 @@
 # arnthorny.github.io
 
-This repo contains my personal projets from my JavaScript journey
+This repo contains personal projets from my JavaScript journey
 
 # Projects
 
