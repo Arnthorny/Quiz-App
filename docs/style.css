@@ -1,0 +1,299 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  /* background-color: rgb(194, 161, 161); */
+  font-family: sans-serif;
+  /* font-size: 20px; */
+  /* padding: 50px; */
+  color: rgb(255, 255, 255);
+  background-image: linear-gradient(to top left, #330a3b 0%, #231b8f 100%);
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 5;
+}
+
+main {
+  background-color: rgba(255, 255, 255, 0.05);
+  width: 70vw;
+  height: 70vh;
+  filter: blur();
+  backdrop-filter: blur(200px);
+  box-shadow: 2px 3rem 5rem rgb(0 0 0 / 25%);
+  border-radius: 9px;
+  /* overflow: hidden; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown {
+  position: relative;
+  order: -4;
+  align-self: flex-end;
+  right: 3%;
+  top: 0%;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  width: 8em;
+  align-items: center;
+  z-index: 6;
+}
+
+.dropdown button {
+  background-color: transparent;
+  border: 0;
+  align-self: flex-end;
+  width: 2em;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dropdown-lifelines {
+  display: block;
+  top: 100%;
+  position: absolute;
+  left: 20%;
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+  /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
+}
+
+.dropdown-lifelines button {
+  font-family: Arial;
+  color: whitesmoke;
+  font-size: 1em;
+  width: auto;
+  margin-bottom: 20%;
+  border: 2px solid orangered;
+  border-radius: 50%;
+  padding: 10% 10%;
+}
+
+.dropdown-lifelines button:active {
+  border: 2px solid white;
+}
+
+.hidden {
+  display: none;
+}
+
+.used {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='48' width='48'%3E%3Cpath fill='%23ff4500' d='M12.45 37.65 10.35 35.55 21.9 24 10.35 12.45 12.45 10.35 24 21.9 35.55 10.35 37.65 12.45 26.1 24 37.65 35.55 35.55 37.65 24 26.1Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: rgb(231, 28, 28);
+}
+
+.cash {
+  font-size: 2rem;
+  align-self: flex-start;
+  box-shadow: 0 1rem 4rem rgb(0 0 0 / 25%);
+  position: relative;
+  order: -1;
+  border-radius: 15px;
+  top: 0%;
+  left: 5%;
+  border: 1px dashed orangered;
+  color: white;
+  padding: 1% 2%;
+}
+
+.questionNo {
+  font-size: 2.5rem;
+  border-radius: 20px;
+  border: 2px solid orangered;
+  top: -3%;
+  align-self: center;
+  position: relative;
+  padding: 0.5rem 1rem;
+}
+
+.question {
+  text-align: center;
+  width: 70%;
+  border: 1px solid rgba(46, 116, 173, 0.548);
+  border-radius: 20px;
+  margin-bottom: 9px;
+  font-size: 1.5rem;
+  padding: 1%;
+  color: white;
+}
+
+.options-container {
+  display: flex;
+  align-items: center;
+  width: 70%;
+  height: 25%;
+  flex-wrap: wrap;
+  align-content: stretch;
+  justify-content: space-between;
+  flex-direction: row;
+}
+.options-container button {
+  text-align: left;
+  width: 48%;
+  border: 1px solid rgba(46, 116, 173, 0.548);
+  border-radius: 20px;
+  font-size: 1.3em;
+  padding: 1%;
+  background-color: initial;
+  color: white;
+}
+
+.options-container button:active {
+  transform: translate(0, 10%);
+  box-shadow: 0 1rem 2rem rgb(0 0 0 / 15%);
+}
+
+/* Styling the game start button */
+.gameStart {
+  position: relative;
+  top: -5%;
+  width: auto;
+  align-self: flex-start;
+  order: -4;
+  left: 5%;
+}
+
+.gameStart button {
+  font-family: Arial;
+  background-color: transparent;
+  color: whitesmoke;
+  font-size: 1.2rem;
+  background-color: #10042c69;
+  border: 2px solid rgba(255, 68, 0, 0.404);
+  border-radius: 20px;
+  padding: 10% 10%;
+  align-self: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gameStart button:active {
+  transform: translate(0, 10%);
+  box-shadow: 0 1rem 2rem rgba(241, 228, 228, 0.8);
+}
+
+/* Animation after picking option */
+.flash {
+  -webkit-animation: flash-animation 1s infinite;
+  animation: flash-animation 1s infinite;
+}
+
+@-webkit-keyframes flash-animation {
+  from {
+    background: yellow;
+  }
+  to {
+    background: default;
+  }
+}
+
+@keyframes flash-animation {
+  from {
+    background: yellow;
+  }
+  to {
+    background: default;
+  }
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+  body {
+    width: 100vw;
+  }
+  .question {
+    width: 90%;
+  }
+  .options-container {
+    width: 75%;
+    flex-direction: column;
+    height: 20rem;
+  }
+
+  .options-container button {
+    width: 100%;
+    /* margin-bottom: 5%; */
+  }
+
+  main {
+    height: 70vh;
+  }
+
+  .dropdown {
+    width: 5em;
+  }
+}
+
+@media (max-height: 600px) {
+  @media (max-width: 350px) {
+    body {
+      width: 100vw;
+    }
+
+    main {
+      height: 95vh;
+      width: 95vw;
+    }
+  }
+
+  main {
+    height: 90vh;
+  }
+}
+
+@media (min-height: 650px) {
+  main {
+    height: 70vh;
+  }
+}
+
+@media (max-width: 350px) {
+  .gameStart {
+    width: 4em;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gameStart button:hover {
+    cursor: pointer;
+  }
+
+  .options-container button:hover {
+    background-color: rgba(26, 63, 185, 0.575);
+    cursor: pointer;
+  }
+
+  .dropdown button:hover {
+    cursor: pointer;
+  }
+  .dropdown-lifelines button:hover {
+    border: 2px solid white;
+  }
+}
