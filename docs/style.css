@@ -111,13 +111,14 @@ main {
 }
 
 .cash {
-  font-size: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
   align-self: flex-start;
   box-shadow: 0 1rem 4rem rgb(0 0 0 / 25%);
   position: relative;
   order: -1;
   border-radius: 15px;
-  top: 0%;
+  top: -2%;
   left: 5%;
   border: 1px dashed orangered;
   color: white;
@@ -161,8 +162,8 @@ main {
   width: 48%;
   border: 1px solid rgba(46, 116, 173, 0.548);
   border-radius: 20px;
-  font-size: 1.3em;
-  padding: 1%;
+  font-size: 1.3rem;
+  padding: 2%;
   background-color: initial;
   color: white;
 }
@@ -196,8 +197,8 @@ main {
 }
 
 .guaranteed {
-  color: black;
-  background-color: #ff4500;
+  color: orangered;
+  border: 1px dashed white;
 }
 
 .gameStart button:active {
