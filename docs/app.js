@@ -2,10 +2,11 @@
 const questionsForGame = [...questions];
 
 let apiQ = []; //This array stores the questions from the API call
-apiCall(); //This calls the async function that fetches the questions
+let sessToken; //This stores the current token
+tokenFunc();
 
 (async function shuff() {
-  questionsForGame.sort((a, b) => Math.random() - Math.random());
+  questionsForGame.sort(() => Math.random() - Math.random());
 })(); //This Immediately Invoked function randomly shuffles the local questions array once
 
 //This array contains the test cash prizes to be won
@@ -26,6 +27,7 @@ const allOptionTextEl = document.querySelectorAll(".op");
 const allOptionButtonEl = document.querySelectorAll(".option");
 const questionNumber = document.querySelector(".questionNo");
 const cashWonEl = document.querySelector(".money");
+const optionContainer = document.querySelector("options-container");
 
 //Global variables are declared
 let qIndex;
@@ -33,6 +35,7 @@ let qnA = []; //The qnA variable stores the current game questions array
 let cashWon;
 let currentSelection;
 let randomIndex;
+let gamePause = false;
 
 //This function adds or removes event listeners
 function listenerToggle(domEl, removeOrAdd, funcName) {
@@ -45,11 +48,15 @@ function listenerToggle(domEl, removeOrAdd, funcName) {
 
 //This function toggles the display of the lifeline buttons and container
 const lifelineToggle = function () {
+  if (gamePause) return;
   dropIcons[0].classList.toggle("hidden");
   dropIcons[1].classList.toggle("hidden");
-  lifeLinesBox.classList.toggle("hidden");
+  lifeLinesBox.classList.toggle("visible");
   overlay.classList.toggle("hidden");
 };
+
+//This removes the overlay when it is clicked
+overlay.addEventListener("click", () => lifelineToggle());
 
 //This function executes when a lifeline button is clicked on
 function lifeLineUsed() {
@@ -69,31 +76,43 @@ function lifeLineUsed() {
 
 //This function checks the hasPlayerWon state (whether a player lost, won or walked away)
 const hasPlayerWon = function (win = true, walkaway = false) {
-  pause("hasPlayerWon");
-  cashWonEl.parentElement.classList.add("hidden");
+  questionNumber.classList.remove("visible");
+  cashWonEl.parentElement.classList.remove("visible");
+
+  apiCall();
+
+  gamePause = true;
+  const y =
+    currentSelection &&
+    [...allOptionTextEl].find(
+      (x) => x.textContent === decode(currentSelection.correct_answer)
+    );
   //The above code will executes regardless of the hasPlayerWon state
 
   //These conditionals execute based on the hasPlayerWon state
-  if (win) {
-    questionNumber.textContent = `YOU HAVE WON \u20A6${cashToWin[15].toLocaleString()}`;
-  } else if (walkaway) {
-    questionNumber.textContent = `YOU WALKED AWAY WITH \u20A6${cashWon.toLocaleString()}`;
-  } else {
-    const y = [...allOptionTextEl].find(
-      (x) => x.textContent === decode(currentSelection.correct_answer)
-    );
-    y.parentElement.style.backgroundColor = "green";
-    const amountWon = cashWon >= 250000 ? 250000 : cashWon >= 20000 ? 20000 : 0;
-    questionNumber.textContent = `YOU HAVE WON \u20A6${amountWon.toLocaleString()}`;
-  }
-  //Change the event listener function from 'walk' to 'begin' so as to restart game
-  //This will execute regardless of hasPlayerWon state
-  startButton.removeEventListener("click", walk);
-  startButton.childNodes[0].textContent = "RESTART GAME";
-  startButton.addEventListener("click", begin);
-  apiCall();
+  setTimeout(() => {
+    questionNumber.classList.add("visible");
+    if (win) {
+      questionNumber.textContent = `YOU HAVE WON \u20A6${cashToWin[15].toLocaleString()}`;
+    } else if (walkaway) {
+      questionNumber.textContent = `YOU WALKED AWAY WITH \u20A6${cashWon.toLocaleString()}`;
+      y.parentElement.style.backgroundColor = "green";
+    } else {
+      y.parentElement.style.backgroundColor = "green";
+      const amountWon =
+        cashWon >= 250000 ? 250000 : cashWon >= 20000 ? 20000 : 0;
+      questionNumber.textContent = `YOU HAVE WON \u20A6${amountWon.toLocaleString()}`;
+    }
+
+    //Change the event listener function from 'walk' to 'begin' so as to restart game
+    //This will execute regardless of hasPlayerWon state
+    startButton.removeEventListener("click", walk);
+    startButton.childNodes[0].textContent = "RESTART GAME";
+    startButton.addEventListener("click", begin);
+  }, 250);
 };
 
+/*
 //This function turns of all event listeners when a user selects an option or when the game ends
 const pause = function (event) {
   listenerToggle(dropCloseBtn, "remove", lifelineToggle);
@@ -102,6 +121,7 @@ const pause = function (event) {
     listenerToggle(startButton, "remove", walk);
   }
 };
+*/
 
 //This function is in charge of most of the game's view
 //It takes three parameters: current qnA, if the game is still on and if user has walked
@@ -116,20 +136,28 @@ function renderQ(selection, gameplay = true, walkaway = false) {
     } else cashWonEl.parentElement.classList.remove("guaranteed");
     qIndex++; //Increments the current question number
     questionNumber.textContent = qIndex; //update the dom with the current question number
+    questionNumber.classList.add("visible");
     questionEL.textContent = decode(selection.question); //update the current question
     listenerToggle(dropCloseBtn, "add", lifelineToggle); //add an event handler to the lifeline dropdown
-    listenerToggle(startButton, "add", walk); //Add the start button event listener back
+    // listenerToggle(startButton, "add", walk); //Add the start button event listener back
 
     const options = [...selection.incorrect_answers, selection.correct_answer];
-    for (const op of allOptionTextEl) {
-      const randomIndex = Math.trunc(Math.random() * options.length);
-      op.textContent = decode(options.splice(randomIndex, 1)[0]);
+    for (const [i, op] of allOptionTextEl.entries()) {
+      op.textContent = "";
       op.parentElement.style.backgroundColor = "";
-      op.parentElement.addEventListener("click", checker);
-    } //This loop randomly distributes options and adds an event listener to each one
+      setTimeout(() => {
+        const randomIndex = Math.trunc(Math.random() * options.length);
+        op.textContent = decode(options.splice(randomIndex, 1)[0]);
+        op.parentElement.addEventListener("click", checker);
+
+        if (i === 3) gamePause = false; // gameplay resumes when all options are set
+        //This loop randomly distributes options and adds an event listener to each one
+      }, 500 * i);
+      //TODO Implement event delegation here
+    }
   }
   if (walkaway) {
-    hasPlayerWon(false, true); //Call hasPlayerWon function if player walke away
+    hasPlayerWon(false, true); //Call hasPlayerWon function if player walked away
   } else if (!(selection && selection.question)) {
     hasPlayerWon(); //if the questions are exhausted, player has won!!
   } else {
@@ -139,13 +167,14 @@ function renderQ(selection, gameplay = true, walkaway = false) {
 
 //This function returns the next auestion in the array
 const nextQuestion = function () {
-  currentSelection = qnA.splice(0, 1)[0];
+  currentSelection = qnA.shift(); //qnA.splice(0, 1)[0];
   return currentSelection;
 };
 
 //This function checks the player's answer
 function checker() {
-  pause("checker");
+  if (gamePause) return;
+  gamePause = true;
   const ansPick = this.children.item(1).textContent; //This stores the user's selection
   const randomFlash = Math.trunc(Math.random() * 4000); //count for yellow flash
   this.classList.add("flash"); //This adds the flashing background
@@ -155,37 +184,41 @@ function checker() {
     this.classList.remove("flash");
     const correctOrNot = ansPick === decode(currentSelection.correct_answer); //check option picked
     this.style.backgroundColor = correctOrNot ? "green" : "red"; //set color accordingly
+    questionNumber.classList.remove("visible");
 
-    if (correctOrNot) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (correctOrNot) {
         renderQ(nextQuestion(), correctOrNot);
-      }, 1000); //Move to next question after 1 second
-    } else hasPlayerWon(false); //else call hasPlayerWon function with false parameter after flashing
+      } //Move to next question after 1 second
+      else hasPlayerWon(false); //else call hasPlayerWon function with false parameter after flashing
+    }, 250);
   }, randomFlash);
 }
 
 //Call this function if the player walks away
 function walk() {
+  if (gamePause) return;
   renderQ(undefined, false, true); //render based on parameters
-  for (const op of allOptionTextEl) {
-    if (op.textContent === decode(currentSelection.correct_answer)) {
-      op.parentElement.style.backgroundColor = "green";
-      break;
-    } //show the user the correct option
-  }
+  // for (const op of allOptionTextEl) {
+  //   if (op.textContent === decode(currentSelection.correct_answer)) {
+  //     op.parentElement.style.backgroundColor = "green";
+  //     break;
+  //   } //show the user the correct option
+  // }
 }
 
 //This function starts or restarts the game
 function begin() {
+  gamePause = true;
   apiOrLocal(); //Calls the function to determine where questions are to be gotten from
   questionNumber.textContent = qIndex = 0; //set current question number to 0
-  questionNumber.classList.remove("hidden");
+  // questionNumber.classList.add("visible");
   renderQ(nextQuestion()); //display next question and options
 
   // add event listeners to all options, lifelines and lifelines dropdown.
-  for (const btns of allOptionButtonEl) {
-    listenerToggle(btns, "add", checker);
-  }
+  // for (const btns of allOptionButtonEl) {
+  //   listenerToggle(btns, "add", checker);
+  // }
 
   for (const lifeline of lifeLines) {
     listenerToggle(lifeline, "add", lifeLineUsed);
@@ -193,17 +226,39 @@ function begin() {
   }
 
   dropCloseBtn.addEventListener("click", lifelineToggle);
-  cashWonEl.parentElement.classList.remove("hidden");
+  cashWonEl.parentElement.classList.add("visible");
 
   //Change event listener of start button to 'walk' function
   startButton.removeEventListener("click", begin);
   startButton.childNodes[0].textContent = "WALK AWAY";
   startButton.addEventListener("click", walk);
   console.log("done"); //for debugging
+  apiCall();
 }
 
 //This sets the ball rolling
 startButton.addEventListener("click", begin);
+
+//API HANDLING
+async function tokenFunc() {
+  try {
+    const fetchToken = await fetch(
+      "https://opentdb.com/api_token.php?command=request"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.response_code !== 0) {
+          throw Error("Server error");
+        }
+        return data;
+      });
+    sessToken = fetchToken.token;
+    apiCall(); //This calls the async function that fetches the questions
+  } catch (error) {
+    console.log(`Something went wrong: (${error})`);
+    setTimeout(() => tokenFunc(), 5000);
+  }
+}
 
 //This function handles errors from api calls
 function manageErr(response) {
@@ -215,37 +270,50 @@ function manageErr(response) {
 
 //This async function retrieves questions from Opentdb database
 async function apiCall() {
-  apiQ = [];
+  if (!sessToken) return; //Only run function if there is a session token
+
+  //This array calculates number of question to retrieve from api
+  const aTr = [...retrieve(apiQ.length, undefined, "api")];
+  if (!aTr.some((x) => x > 0)) return;
   try {
     const fetchEasy = await fetch(
-      "https://opentdb.com/api.php?amount=5&category=9&difficulty=easy&type=multiple"
+      `https://opentdb.com/api.php?amount=${aTr[2]}&difficulty=easy&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
     const fetchMedium = await fetch(
-      "https://opentdb.com/api.php?amount=5&category=9&difficulty=medium&type=multiple"
+      `https://opentdb.com/api.php?amount=${aTr[1]}&difficulty=medium&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
     const fetchHard = await fetch(
-      "https://opentdb.com/api.php?amount=5&category=9&difficulty=hard&type=multiple"
+      `https://opentdb.com/api.php?amount=${aTr[0]}&difficulty=hard&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
-    const fetchedAll = await Promise.all([fetchEasy, fetchMedium, fetchHard]);
+    const fetchedAll = await Promise.all([fetchHard, fetchMedium, fetchEasy]);
 
     //Only push questions if api response is valid
     for (const res of fetchedAll) {
       if (res.ok) {
         const drop = await res.json();
-        if (drop.response_code == 0) {
-          apiQ.push(...drop.results);
+        //These blocks check the response_code in opentdb's api and act accordingly
+        if (drop.response_code === 0) {
+          apiQ.unshift(...drop.results);
+        } else if (drop.response_code === 4) {
+          tokenFunc(); //Request new token
+          console.log("Code 4");
+          return;
+        } else if (drop.response_code === 2) {
+          apiQ.push(...[]);
+          console.log("Code 2");
         }
       } else throw new Error("failed");
     }
+    console.log("API Call complete");
   } catch (error) {
     console.log(`Failed this error: ${error}`);
   }
 }
 
-//Decode encoded html text
+//Decode encoded html text from API
 function decode(text) {
   return new DOMParser().parseFromString(text, "text/html").documentElement
     .textContent;
@@ -263,27 +331,27 @@ const refiller = (source, type) => {
 
 //This function retrieves questions from the available source(API or Local)
 //It only return the specific amount of questions needed for each difficulty
-function retrieve(n, source) {
+function retrieve(n, source, apiCallOrLocal = "local") {
   let qNeeded = 15 - n; //This calculates how many questions have already been answered by the user
   if (qNeeded < 0 || qNeeded > 15) return "Not Valid";
-  /*This array stores the exact amount of hard, medium and easy questions respectively 
-  required to be retrieved*/
-  const fillArr = [0, 0, 0].map((x, i) => {
+  /*This array stores the exact amount of hard, medium and easy questions 
+  respectively required to be retrieved*/
+  const fillArr = [0, 0, 0].map((_, i) => {
     const reducer = 15 - 5 * (i + 1);
     const val = qNeeded > reducer ? qNeeded - reducer : 0;
     qNeeded -= val;
     return val;
   });
+  if (apiCallOrLocal === "api") return fillArr;
 
   function sanitizeArr(arr) {
     return arr
       .filter((x) => x !== undefined)
-      .sort((a, b) => Math.random() - Math.random());
+      .sort((_, __) => Math.random() - Math.random());
   } //This shuffles the retrieved questions and filters undefined values
 
   /*These three variables (easyFill, medFill, hardFill) are created to store the questions 
   returned by the refiller function*/
-
   const easyFill = Array.from(
     { length: fillArr[2] },
     refiller.bind({}, source, "easy")
@@ -308,9 +376,8 @@ function retrieve(n, source) {
 //This function determines the source of the questions to be used by the player
 function apiOrLocal() {
   if (apiQ.length === 15) {
-    console.log("API");
-    qnA = [...retrieve(0, apiQ)]; //Use up all questions from API call
-    apiCall(); //Call api to retrieve new questions
+    console.log("API array used at start");
+    qnA.unshift(...retrieve(qnA.length, apiQ)); //Use up some questions from API call array
   } else {
     qnA.unshift(...retrieve(qnA.length, questionsForGame)); //destructure array of questions of object and store here
     //if block to reload page for when local storage is depleted

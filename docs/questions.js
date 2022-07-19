@@ -2,7 +2,7 @@
 const questions = [
   {
     question: "Which of the following gases is the most abundant on the Sun?",
-    incorrect_answers: ["Helium", "Oxygen", "Helium", "Nitrogen"],
+    incorrect_answers: ["Oxygen", "Helium", "Nitrogen"],
     correct_answer: "Hydrogen",
     difficulty: "medium",
   },
