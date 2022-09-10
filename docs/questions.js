@@ -217,7 +217,7 @@ const questions = [
   {
     question: "One of these is not a flowering plant?",
     incorrect_answers: ["Lily", "Hibiscus", "Crysanthemum"],
-    correct_answer: "Cassava",
+    correct_answer: "Fern",
     difficulty: "easy",
   },
   {
