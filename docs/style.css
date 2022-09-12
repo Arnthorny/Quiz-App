@@ -75,7 +75,13 @@ main {
   position: absolute;
   width: 100%;
   opacity: 0;
-  transition: opacity 1s;
+  transition: all 1s;
+  height: 0;
+  overflow: hidden;
+}
+
+.dropdown-lifelines.visible {
+  height: auto;
 }
 
 .dropdown-lifelines button {
