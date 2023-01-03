@@ -126,7 +126,7 @@ const pause = function (event) {
 //This function is in charge of most of the game's view
 //It takes three parameters: current qnA, if the game is still on and if user has walked
 function renderQ(selection, gameplay = true, walkaway = false) {
-  //This if block only runs when there is still a question, game is still on and user did not walk
+  //This if block, only runs when there is still a question, game is still on and user did not walk
   if (selection && selection.question && gameplay && !walkaway) {
     cashWon = cashToWin[qIndex]; //Stores the amount that has been won
     cashWonEl.textContent = cashToWin[qIndex + 1].toLocaleString(); //Displays the amount about to be won
@@ -277,15 +277,15 @@ async function apiCall() {
   if (!aTr.some((x) => x > 0)) return;
   try {
     const fetchEasy = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[2]}&difficulty=easy&type=multiple&token=${sessToken}`
+      `https://opentdb.com/api.php?amount=${aTr[2]}&category=9&difficulty=easy&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
     const fetchMedium = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[1]}&difficulty=medium&type=multiple&token=${sessToken}`
+      `https://opentdb.com/api.php?amount=${aTr[1]}&category=9&difficulty=medium&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
     const fetchHard = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[0]}&difficulty=hard&type=multiple&token=${sessToken}`
+      `https://opentdb.com/api.php?amount=${aTr[0]}&category=9&difficulty=hard&type=multiple&token=${sessToken}`
     ).then(manageErr);
 
     const fetchedAll = await Promise.all([fetchHard, fetchMedium, fetchEasy]);
