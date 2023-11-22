@@ -283,7 +283,6 @@ async function apiCall() {
         const drop = await res.json();
         //These blocks check the response_code in opentdb's api and act accordingly
         if (drop.response_code === 0) {
-          console.log(drop);
           apiQ.unshift(...drop.results);
         } else if (drop.response_code === 4) {
           tokenFunc(); //Request new token
