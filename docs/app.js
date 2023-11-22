@@ -112,17 +112,6 @@ const hasPlayerWon = function (win = true, walkaway = false) {
   }, 250);
 };
 
-/*
-//This function turns of all event listeners when a user selects an option or when the game ends
-const pause = function (event) {
-  listenerToggle(dropCloseBtn, "remove", lifelineToggle);
-  allOptionButtonEl.forEach((btns) => listenerToggle(btns, "remove", checker)); //IMPORTANT
-  if (event === "checker") {
-    listenerToggle(startButton, "remove", walk);
-  }
-};
-*/
-
 //This function is in charge of most of the game's view
 //It takes three parameters: current qnA, if the game is still on and if user has walked
 function renderQ(selection, gameplay = true, walkaway = false) {
@@ -199,12 +188,6 @@ function checker() {
 function walk() {
   if (gamePause) return;
   renderQ(undefined, false, true); //render based on parameters
-  // for (const op of allOptionTextEl) {
-  //   if (op.textContent === decode(currentSelection.correct_answer)) {
-  //     op.parentElement.style.backgroundColor = "green";
-  //     break;
-  //   } //show the user the correct option
-  // }
 }
 
 //This function starts or restarts the game
@@ -216,9 +199,6 @@ function begin() {
   renderQ(nextQuestion()); //display next question and options
 
   // add event listeners to all options, lifelines and lifelines dropdown.
-  // for (const btns of allOptionButtonEl) {
-  //   listenerToggle(btns, "add", checker);
-  // }
 
   for (const lifeline of lifeLines) {
     listenerToggle(lifeline, "add", lifeLineUsed);
@@ -268,6 +248,15 @@ function manageErr(response) {
   return response;
 }
 
+// This function delays fetch calls to OpenTDB's API
+async function delayFetch(amount, diff, ms) {
+  const url = `https://opentdb.com/api.php?amount=${amount}&category=9&difficulty=${diff}&type=multiple&token=${sessToken}`;
+  const wait_fetch = await new Promise((resolve) =>
+    setTimeout(resolve, ms)
+  ).then(() => fetch(url));
+  return wait_fetch;
+}
+
 //This async function retrieves questions from Opentdb database
 async function apiCall() {
   if (!sessToken) return; //Only run function if there is a session token
@@ -276,26 +265,25 @@ async function apiCall() {
   const aTr = [...retrieve(apiQ.length, undefined, "api")];
   if (!aTr.some((x) => x > 0)) return;
   try {
-    const fetchEasy = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[2]}&category=9&difficulty=easy&type=multiple&token=${sessToken}`
-    ).then(manageErr);
+    let fetched, aTr_i;
+    const allFetches = [];
+    const diffs = ["easy", "medium", "hard"];
 
-    const fetchMedium = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[1]}&category=9&difficulty=medium&type=multiple&token=${sessToken}`
-    ).then(manageErr);
-
-    const fetchHard = await fetch(
-      `https://opentdb.com/api.php?amount=${aTr[0]}&category=9&difficulty=hard&type=multiple&token=${sessToken}`
-    ).then(manageErr);
-
-    const fetchedAll = await Promise.all([fetchHard, fetchMedium, fetchEasy]);
+    for (let i = 0; i < diffs.length; i++) {
+      aTr_i = diffs.length - 1 - i;
+      fetched = await delayFetch(aTr[aTr_i], diffs[i], i ? 5000 : 0).then(
+        manageErr
+      );
+      allFetches.unshift(fetched);
+    }
 
     //Only push questions if api response is valid
-    for (const res of fetchedAll) {
+    for (const res of allFetches) {
       if (res.ok) {
         const drop = await res.json();
         //These blocks check the response_code in opentdb's api and act accordingly
         if (drop.response_code === 0) {
+          console.log(drop);
           apiQ.unshift(...drop.results);
         } else if (drop.response_code === 4) {
           tokenFunc(); //Request new token
