@@ -262,16 +262,19 @@ async function apiCall() {
   if (!sessToken) return; //Only run function if there is a session token
 
   //This array calculates number of question to retrieve from api
-  const aTr = [...retrieve(apiQ.length, undefined, "api")];
+  //It returns in this form [hard, medium, easy] and thus needs reversal
+
+  const aTr = [...retrieve(apiQ.length, undefined, "api")].reverse();
   if (!aTr.some((x) => x > 0)) return;
   try {
-    let fetched, aTr_i;
+    let fetched;
     const allFetches = [];
     const diffs = ["easy", "medium", "hard"];
 
     for (let i = 0; i < diffs.length; i++) {
-      aTr_i = diffs.length - 1 - i;
-      fetched = await delayFetch(aTr[aTr_i], diffs[i], i ? 5000 : 0).then(
+      // aTr_i = diffs.length - 1 - i;
+      // TODO Populate quiz array as soon as api responds
+      fetched = await delayFetch(aTr[i], diffs[i], i ? 5000 : 0).then(
         manageErr
       );
       allFetches.unshift(fetched);
